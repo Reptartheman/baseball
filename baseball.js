@@ -1,20 +1,49 @@
-let contact = [
-  "single",
-  "double",
-  "triple",
-  "walk",
-  "hit-by-pitch",
-  "ground ball",
-  "fly ball",
-];
-let homeRuns = ["solo", "2-run", "3-run", "Grand Slam"];
-let pitches = ["fastball", "changeup", "curveball", "slider"];
-let strikes = 0;
-let balls = 0;
-let runnersOnBase = 0;
-let outs = 0;
-let count = `${balls} balls & ${strikes} strikes`;
-let inTheZone = ["ball", "strike"];
+let gameState = {
+  strikes: 0,
+  balls: 0,
+  outs: 0,
+  count: `${this.balls} balls & ${this.strikes} strikes`,
+  runnersOnBase: 0,
+  inning: 1,
+  inTheZone: ['ball', 'strike'],
+  resetCount: function () {
+    (this.strikes = 0), (this.balls = 0);
+  },
+};
+
+const hitTypes = {
+  single: `single!`,
+  double: `double!`,
+  triple: `triple!`,
+  inSideTheParkHomeRun: `Inside the park home run!`,
+  soloHomeRun: `Solo home run!`,
+  twoRunHomeRun: `Two run home run!`,
+  threeRunHomeRun: `Three run home run!`,
+  grandSlam: `Grand Slam!`
+};
+
+const pitchTypes = {
+  fastball: `fastball`,
+  twoSeamFastball: `Two seam fastball`,
+  slider: `slider`,
+  curveBall: `curveball`,
+  changeUp: `changeup`,
+  knuckleBall: `knuckleBall`,
+  sweeper: `sweeper`,
+  splitter: `splitter`,
+  cutter: `cutter`,
+}
+
+const runnersOnBase = {
+  first: `Runner on first`,
+  second: `Runner on second`,
+  third: `Runner on third`,
+  firstAndSecond: `Runners on first and second`,
+  firstAndThird: `Runners on first and third`,
+  secondAndThird: `Runners on second and third`,
+  basesLoaded: `bases loaded`,
+};
+
 let strikesDiv = document.getElementById("strikes");
 let ballsDiv = document.getElementById("balls");
 let countDiv = document.getElementById("count");
@@ -23,91 +52,92 @@ const homeScore = document.getElementById("homeScore");
 const awayScore = document.getElementById("awayScore");
 let outsDiv = document.getElementById("outs");
 let runnersOn = document.getElementById("runnersOn");
-let inning = 1;
 let inningDiv = document.getElementById("inning");
 
-strikesDiv.innerHTML = `Strikes: ${strikes}`;
-ballsDiv.innerHTML = `Balls: ${balls}`;
-countDiv.innerHTML = `Count: ${balls} balls & ${strikes} strikes`;
-runnersOn.innerHTML = `Runners on Base: ${runnersOnBase}`;
-inningDiv.innerHTML = `It is the top of ${inning}st inning`;
+const init = () => {
+  strikesDiv.innerHTML = `Strikes: ${gameState.strikes}`;
+  ballsDiv.innerHTML = `Balls: ${gameState.balls}`;
+  countDiv.innerHTML = `Count: ${gameState.balls} balls & ${gameState.strikes} strikes`;
+  runnersOn.innerHTML = `Runners on Base: ${gameState.runnersOnBase}`;
+  inningDiv.innerHTML = `It is the top of ${gameState.inning}st inning`;
+};
+
+function shufflePitches(object) {
+  let pitches = Object.keys(object);
+  let pitch = object[pitches[Math.floor(Math.random() * pitches.length)]];
+  console.log(pitch);
+}
+
 
 
 
 function throwPitch() {
-  let pitchThrown = pitches[Math.floor(Math.random() * pitches.length)];
+  shufflePitches(pitchTypes);
+
+  let inTheZone = ["ball", "strike"];
   let ballOrStrike = inTheZone[Math.floor(Math.random() * inTheZone.length)];
   if (ballOrStrike === "strike") {
     madeContact();
-    strikes++;
-    if (strikes === 3) {
+    gameState.strikes++;
+    if (gameState.strikes === 3) {
+      gameState.resetCount();
       console.log("YOURRREEE OUT!");
-      outs++;
-      resetCount();
+      gameState.outs++;
     }
   } else {
     console.log(`${pitchThrown} for a ball`);
-    balls++;
-    if (balls === 4) {
+    gameState.balls++;
+    if (gameState.balls === 4) {
+      gameState.resetCount();
       console.log("TAKE YOUR BASE!");
-      runnersOnBase++;
-      resetCount();
+      gameState.runnersOnBase++;
     }
   }
-  if (outs === 3) {
-    outs = 0;
-    runnersOnBase = 0;
+  if (gameState.outs === 3) {
+    gameState.outs = 0;
+    gameState.runnersOnBase = 0;
   }
-
-  
-  strikesDiv.innerHTML = `Strikes: ${strikes}`;
-  ballsDiv.innerHTML = `Balls: ${balls}`;
-  countDiv.innerHTML = `Count: ${balls} balls & ${strikes} strikes`;
-  outsDiv.innerHTML = `Outs: ${outs}`;
-  runnersOn.innerHTML = `Runners on Base: ${runnersOnBase}`;
-}
-
-function resetCount() {
-  strikes = 0;
-  balls = 0;
+  init();
 }
 
 function madeContact() {
+  let contact = [
+    "single",
+    "double",
+    "triple",
+    "hit-by-pitch",
+    "ground ball",
+    "fly ball",
+  ];
   let hit = contact[Math.floor(Math.random() * contact.length)];
   switch (hit) {
-    case contact[0]:
-    case contact[3]:
-    case contact[4]:
-      resetCount();
+    case contact[0]: //single
+    case contact[3]: //hit by pitch
       console.log(hit);
-      runnersOnBase++;
+      gameState.runnersOnBase++;
+      gameState.resetCount();
       break;
-    case contact[1]:
-      resetCount();
+    case contact[1]: //double
       console.log(hit);
-      runnersOnBase++;
+      gameState.runnersOnBase++;
+      gameState.resetCount();
       break;
-    case contact[2]:
-      resetCount();
+    case contact[2]: //triple
       console.log(hit);
-      runnersOnBase++;
+      gameState.runnersOnBase++;
+      gameState.resetCount();
       break;
-    case contact[5] || contact[6]:
-      resetCount();
+    case contact[4] || contact[5]: ///GB //FB
       console.log(hit);
-      outs++;
+      gameState.outs++;
+      gameState.resetCount();
       break;
     default:
-      break; 
+      break;
   }
-}
-
-function upAtBat() {
-  let atBatDiv = document.getElementById("upAtBat");
-  
 }
 
 
 
 throwPitchBtn.addEventListener("click", throwPitch);
-
+init();
